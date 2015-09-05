@@ -7,17 +7,14 @@
         app:showAsAction="ifRoom"  />
     <item android:id="@+id/action_battery_50"
         android:icon="@mipmap/ic_battery_50"
-        android:title="@string/action_settings"
         android:visible="false"
         app:showAsAction="ifRoom"  />
     <item android:id="@+id/action_battery_70"
         android:icon="@mipmap/ic_battery_70"
-        android:title="@string/action_settings"
         android:visible="false"
         app:showAsAction="ifRoom"  />
     <item android:id="@+id/action_battery_71"
         android:icon="@mipmap/ic_battery_71"
-        android:title="@string/action_settings"
         android:visible="false"
         app:showAsAction="ifRoom"  />
 </menu>
