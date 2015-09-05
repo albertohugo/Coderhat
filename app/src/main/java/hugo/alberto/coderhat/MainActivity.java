@@ -2,11 +2,13 @@ package hugo.alberto.coderhat;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -20,8 +22,15 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import hugo.alberto.coderhat.Adapter.DrawerItemCustomAdapter;
 import hugo.alberto.coderhat.Fragment.UserListFragment;
+import hugo.alberto.coderhat.Handler.DatabaseHandler;
+import hugo.alberto.coderhat.Handler.JsonParseHandler;
+import hugo.alberto.coderhat.Model.ListDataModel;
 import hugo.alberto.coderhat.Model.ObjectDrawerItem;
 
 
@@ -34,6 +43,11 @@ public class MainActivity extends ActionBarActivity {
     private CharSequence mTitle;
     private int level = -1;
 
+    private ProgressDialog progressDialog;
+    private DatabaseHandler db;
+    private static final String URL = "http://jsonplaceholder.typicode.com/posts/";
+    private JsonParseHandler jsonParseHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +55,11 @@ public class MainActivity extends ActionBarActivity {
         mTitle = mDrawerTitle = getTitle();
 
         getBatteryPercentage();
+
+        progressDialog = new ProgressDialog(this);
+        db = new DatabaseHandler(this);
+        jsonParseHandler = new JsonParseHandler();
+        new DataFetch().execute();
 
         mNavigationDrawerItemTitles = getResources().getStringArray(R.array.navigation_drawer_items_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -183,6 +202,55 @@ public class MainActivity extends ActionBarActivity {
             startActivity(Intent.createChooser(emailIntent, "Send mail..."));
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(MainActivity.this, "There is no email client installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void readJsonParse(String json_data) {
+        try {
+
+            JSONArray livros = new JSONArray(json_data);
+
+            for (int i = 0; i < livros.length(); i++) {
+                JSONObject contactObj = livros.getJSONObject(i);
+
+                String id = contactObj.getString("id");
+                String userId = contactObj.getString("userId");
+                String title = contactObj.getString("title");
+                String body = contactObj.getString("body");
+
+                Log.d("data is", id + "," + userId + "," + title + "," + body);
+                db.addUsers(new ListDataModel(id, userId, title, body));
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public class DataFetch extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressDialog.setMessage("Please wait...");
+            progressDialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            String json_data = jsonParseHandler.serviceCall(URL, JsonParseHandler.GET);
+            Log.d("in inBG()", "fetch data" + json_data);
+            readJsonParse(json_data);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressDialog.dismiss();
+
         }
     }
 }

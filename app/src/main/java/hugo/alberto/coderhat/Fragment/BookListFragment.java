@@ -2,8 +2,6 @@ package hugo.alberto.coderhat.Fragment;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +16,6 @@ import java.util.List;
 
 import hugo.alberto.coderhat.Adapter.BookCustomAdapter;
 import hugo.alberto.coderhat.Handler.DatabaseHandler;
-import hugo.alberto.coderhat.Handler.JsonParseHandler;
 import hugo.alberto.coderhat.Model.ListDataModel;
 import hugo.alberto.coderhat.R;
 
@@ -26,12 +23,7 @@ public class BookListFragment extends Fragment {
     private ListView listView;
     private ArrayList<ListDataModel> listdatamodel;
     private BookCustomAdapter adapter;
-    private ProgressDialog progressDialog;
     private DatabaseHandler db;
-    private static final String URL = "http://jsonplaceholder.typicode.com/posts/";
-    private JsonParseHandler jsonParseHandler;
-    private Fragment fragment = null;
-
     private String userID;
 
     public BookListFragment() {
@@ -42,10 +34,8 @@ public class BookListFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_book_list, container, false);
         listView = (ListView) rootView.findViewById(R.id.book_list_view);
         listdatamodel = new ArrayList<>();
-        progressDialog = new ProgressDialog(getActivity());
+
         db = new DatabaseHandler(getActivity());
-        jsonParseHandler = new JsonParseHandler();
-        new DataFetch().execute();
 
         Bundle bundle = this.getArguments();
         if (getArguments() != null) {
@@ -91,26 +81,4 @@ public class BookListFragment extends Fragment {
         return rootView;
     }
 
-    public class DataFetch extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressDialog.setMessage("Please wait...");
-            progressDialog.show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            String json_data = jsonParseHandler.serviceCall(URL, JsonParseHandler.GET);
-            Log.d("in inBG()", "fetch data" + json_data);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            progressDialog.dismiss();
-        }
-    }
 }
